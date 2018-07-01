@@ -1,8 +1,13 @@
 package registration
 
 import akka.persistence.{PersistentActor, SaveSnapshotFailure, SaveSnapshotSuccess, SnapshotOffer}
+import registration.RegistrationCommand.GetRegistration
 
-class RegistrationActor extends PersistentActor {
+/**
+  * Upon creation, this PersistentActor retrieves its state from the database
+  * and is ready to receive messages.
+ */
+class RegistrationActor(id: String) extends PersistentActor {
 
   def persistenceId: String = s"registration-${state.id}"
 
@@ -13,6 +18,8 @@ class RegistrationActor extends PersistentActor {
     case SaveSnapshotFailure(metadata, reason) => // ...
     case s: String =>
       persist(s) { evt => state = state.update(evt) }
+    case GetRegistration(id) =>
+      sender() ! Registration("1", "alive")
   }
 
   def receiveRecover: Receive = {

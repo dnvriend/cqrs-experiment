@@ -3,7 +3,7 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.pattern.ask
 import akka.util.Timeout
-import registration.RegistrationCommand.GetRegistration
+import registration.RegistrationActor.{CreateRegistration, GetRegistration}
 import registration.{JsonSupport, Registration}
 
 import scala.concurrent.Future
@@ -19,15 +19,17 @@ trait ApiRoutes extends JsonSupport {
 
   lazy val apiRoutes: Route =
     path("") {
-      concat(
-        get {
-          val registration: Future[Registration] =
-            (registrationSupervisor ? GetRegistration("1")).mapTo[Registration]
-          complete(registration)
-        },
-        post {
-          complete("Hello")
-        })
+      get {
+        val registration: Future[Registration] =
+          (registrationSupervisor ? GetRegistration("1")).mapTo[Registration]
+        complete(registration)
+      }
+    } ~
+        path("create") {
+          get {
+            val registration: Future[Registration] =
+              (registrationSupervisor ? CreateRegistration("1", "created")).mapTo[Registration]
+            complete(registration)
+          }
     }
-
 }

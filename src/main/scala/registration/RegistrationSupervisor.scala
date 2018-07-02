@@ -1,7 +1,7 @@
 package registration
 
 import akka.actor.SupervisorStrategy._
-import akka.actor.{Actor, ActorLogging, OneForOneStrategy, Props}
+import akka.actor.{Actor, ActorLogging, ActorRef, OneForOneStrategy, Props}
 
 import scala.concurrent.duration._
 
@@ -38,8 +38,9 @@ class RegistrationSupervisor() extends Actor with ActorLogging {
       sender() ! Registration("1", "alive")
   }
 
-  private def getRegistrationActor(id: String) = {
-    context.actorOf(Props(new RegistrationActor(id)), s"registration-${id}")
+  private def getRegistrationActor(id: String): ActorRef = {
+    val actorName = s"registration-${id}"
+    context.child(actorName)
+      .getOrElse(context.actorOf(Props(new RegistrationActor(id)), actorName))
   }
-
 }

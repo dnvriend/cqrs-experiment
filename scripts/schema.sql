@@ -21,3 +21,5 @@ CREATE TABLE IF NOT EXISTS public.snapshot (
   snapshot BYTEA NOT NULL,
   PRIMARY KEY(persistence_id, sequence_number)
 );
+
+select * from public.journal;

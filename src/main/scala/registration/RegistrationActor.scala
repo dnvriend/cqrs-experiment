@@ -15,17 +15,44 @@ class RegistrationActor(id: String) extends PersistentActor {
   var state = Registration("0", "empty")
 
   def receiveCommand: Receive = {
-    case SaveSnapshotSuccess(metadata) => // ...
-    case SaveSnapshotFailure(metadata, reason) => // ...
-    case GetRegistration(id) =>
+    case msg@SaveSnapshotSuccess(metadata) =>
+      println("Received: " + msg)
+    case msg@SaveSnapshotFailure(metadata, reason) => // ...
+      println("Received: " + msg)
+    case msg@GetRegistration(id) =>
+      println("Received: " + msg)
       sender() ! state
-    case cmd: Cmd =>
+    case cmd: CreateRegistration =>
+      println("Received: " + cmd)
+      // store the actorRef of the sender
+      val senderRef = sender()
       // Update state and persist the event in the journal
-      persist(checkCommand(cmd))(updateState)
-      // Save snapshot on every state change. Normally you would do this every n changes.
-      saveSnapshot(state)
-    case SupervisorStrategy.Stop =>
+      persist(checkCommand(cmd)) { event =>
+        // update state
+        updateState(event)
+        // Save snapshot on every state change. Normally you would do this every n changes.
+        saveSnapshot(state)
+        senderRef ! akka.actor.Status.Success(Registration(cmd.id, cmd.status))
+      }
+    case cmd@GetRegistration(id) =>
+
+    case cmd: Cmd =>
+      println("Received: " + cmd)
+      // store the actorRef of the sender
+      val senderRef = sender()
+      // Update state and persist the event in the journal
+      persist(checkCommand(cmd)) { event =>
+        // update state
+        updateState(event)
+        // Save snapshot on every state change. Normally you would do this every n changes.
+        saveSnapshot(state)
+        senderRef ! akka.actor.Status.Success(Registration(cmd.id, "generic"))
+      }
+    case msg@SupervisorStrategy.Stop =>
+      println("Received: " + msg)
       context.stop(self)
+    case msg =>
+      println("Unknown command received: " + msg)
   }
 
   def receiveRecover: Receive = {
@@ -52,7 +79,7 @@ class RegistrationActor(id: String) extends PersistentActor {
 
 object RegistrationActor {
 
-  sealed trait Cmd
+  sealed trait Cmd { def id: String }
 
   case class CreateRegistration(id: String, status: String) extends Cmd
 

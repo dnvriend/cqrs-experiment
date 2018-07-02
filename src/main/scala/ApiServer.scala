@@ -1,13 +1,10 @@
 import akka.actor.{ActorRef, ActorSystem, Props}
-
-import scala.concurrent.{Await, Future}
-import akka.stream.ActorMaterializer
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
-import org.graalvm.compiler.nodes.graphbuilderconf.InvocationPlugins.Registration
-import registration.{RegistrationCommand, RegistrationSupervisor}
+import akka.stream.ActorMaterializer
+import registration.RegistrationSupervisor
 
+import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
 object ApiServer extends App with ApiRoutes {

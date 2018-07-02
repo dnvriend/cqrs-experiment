@@ -31,7 +31,7 @@ while true; do
 done;
 }
 
-docker-compose -f scripts/postgres.yml kill
-docker-compose -f scripts/postgres.yml rm -f
-docker-compose -f scripts/postgres.yml up -d
+docker-compose -f postgres.yml kill
+docker-compose -f postgres.yml rm -f
+docker-compose -f postgres.yml up -d
 wait 5432 Postgres
